@@ -1,5 +1,7 @@
 module Todos.Http.TodoHttp
 
+open System
+// open FSharp.Control.Tasks
 open Giraffe
 open Microsoft.AspNetCore.Http
 open Types
@@ -8,7 +10,16 @@ let handlers: HttpFunc -> HttpContext -> HttpFuncResult =
   choose [
     POST
     >=> route "/todos"
-    >=> fun next context -> text "Create" next context
+    >=> fun next context ->
+          task {
+            let save = context.GetService<TodoSave>()
+            let! todo = context.BindJsonAsync<Todo>()
+
+            let todo =
+              { todo with Id = ShortGuid.fromGuid (Guid.NewGuid()) }
+
+            return! json (save todo) next context
+          }
 
     GET
     >=> route "/todos"
@@ -18,9 +29,18 @@ let handlers: HttpFunc -> HttpContext -> HttpFuncResult =
           json todos next context
 
     PUT
-    >=> routef "/todos/%s" (fun id -> fun next context -> text ("Update " + id) next context)
-
+    >=> routef "/todos/%s" (fun id ->
+      fun next context ->
+        task {
+          let save = context.GetService<TodoSave>()
+          let! todo = context.BindJsonAsync<Todo>()
+          let todo = { todo with Id = id }
+          return! json (save todo) next context
+        })
     //http://0.0.0.0:5000/todos/2
     DELETE
-    >=> routef "/todos/%s" (fun id -> fun next context -> text ("Delete " + id) next context)
+    >=> routef "/todos/%s" (fun id ->
+      fun next context ->
+        let delete = context.GetService<TodoDelete>()
+        json (delete id) next context)
   ]
