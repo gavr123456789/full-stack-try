@@ -3,6 +3,14 @@ import prologue
 import ./urls
 import ./views
 import ./mongoViews
+import ./types
+import ./mongoUtils
+
+# initialize data
+method extend(ctx: UserContext) =
+  ctx.data = 999
+  ctx.collection = getMongoCollection()
+
 
 let
   env = loadPrologueEnv(".env")
@@ -21,4 +29,4 @@ app.get("/user/{name}", getUserByNameMongo)
 app.get("/json", jsonGet)
 app.post("/posttest", testPost)
 
-app.run()
+app.run(UserContext)
