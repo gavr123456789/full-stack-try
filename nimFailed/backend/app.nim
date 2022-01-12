@@ -1,7 +1,5 @@
 import prologue
 
-import ./urls
-import ./views
 import ./mongoViews
 import ./types
 import ./mongoUtils
@@ -24,9 +22,8 @@ let
 
 var app = newApp(settings = settings)
 
-app.get("/hello", helloGet) 
-app.get("/user/{name}", getUserByNameMongo)
-app.get("/json", jsonGet)
-app.post("/posttest", testPost)
+app.get("/user/{name}", find)
+app.post("/user/{name}", save)
+app.delete("/user/{name}", delete)
 
 app.run(UserContext)

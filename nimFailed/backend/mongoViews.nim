@@ -1,20 +1,33 @@
 import prologue
 import nimongo/bson
-import nimongo.mongo 
+import nimongo/mongo 
 import ./types
 
 
-proc getUserByNameMongo*(ctx: Context) {.gcsafe, async.} = 
-
+proc find*(ctx: Context) {.gcsafe, async.} = 
   let ctx = UserContext(ctx)
-  doAssert ctx.data == 999
-  echo "data = ", ctx.data
-
   let nameParam = ctx.getPathParams("name")
-  echo "nameParam = ", nameParam
+  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).oneOrNone()
+  if not finded.isNil:
+    resp $finded
+  else: 
+    resp "not found"
 
-  let sas = ctx.collection.find(bson.`%*`({"name": nameParam})).all()
-  echo sas
-  # collection.insert( bson.`%*`({"name": nameParam}))
+proc save*(ctx: Context) {.gcsafe, async.} = 
+  let ctx = UserContext(ctx)
+  let nameParam = ctx.getPathParams("name")
+  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).oneOrNone()
 
-  resp $sas
+  if finded.isNil:
+    let x = ctx.collection.insert( bson.`%*`({"name": nameParam}))
+    if x.ok: resp "created"
+
+  else:
+    let x = ctx.collection.update(finded, bson.`%*`({"name": nameParam}), false, false)
+    if x.ok: resp "updated"
+
+proc delete*(ctx: Context) {.gcsafe, async.} = 
+  let ctx = UserContext(ctx)
+  let nameParam = ctx.getPathParams("name")
+  ctx.collection.remove bson.`%*` {"name": nameParam}
+  resp "sas"
