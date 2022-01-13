@@ -16,15 +16,15 @@ proc find*(ctx: Context) {.gcsafe, async.} =
 proc save*(ctx: Context) {.gcsafe, async.} = 
   let ctx = UserContext(ctx)
   let nameParam = ctx.getPathParams("name")
-  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).oneOrNone()
+  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).all()
 
-  if finded.isNil:
+  if finded.len == 0:
     let x = ctx.collection.insert( bson.`%*`({"name": nameParam}))
     if x.ok: resp "created"
 
   else:
-    let x = ctx.collection.update(finded, bson.`%*`({"name": nameParam}), false, false)
-    if x.ok: resp "updated"
+    if ctx.collection.update(finded[0], bson.`%*`({"name": nameParam}), false, false).ok:
+      resp "updated"
 
 proc delete*(ctx: Context) {.gcsafe, async.} = 
   let ctx = UserContext(ctx)
