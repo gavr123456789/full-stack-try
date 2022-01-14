@@ -7,8 +7,8 @@ import ./types
 proc find*(ctx: Context) {.gcsafe, async.} = 
   let ctx = UserContext(ctx)
   let nameParam = ctx.getPathParams("name")
-  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).oneOrNone()
-  if not finded.isNil:
+  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).all()
+  if finded.len != 0:
     resp $finded
   else: 
     resp "not found"
