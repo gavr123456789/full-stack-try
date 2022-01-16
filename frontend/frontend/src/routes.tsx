@@ -1,15 +1,16 @@
-import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { Counter } from "./features";
 import NotFound from "./NotFound";
 
 import Home from "./pages/Home";
+import { Counter } from "./features/Counter";
+import { LoginPage } from "./pages/Login";
 
 
 export default (
-  <Routes>
-    <Route path="/" element={<Home />} />
+  <Routes >
+    <Route path="/" element={<LoginPage />} />
     <Route path="/count" element={<Counter />} />
+    <Route path="/home" element={<Home />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

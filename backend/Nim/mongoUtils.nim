@@ -1,14 +1,16 @@
 import nimongo/bson
 import nimongo.mongo 
+import ./types
 
 
-proc getMongoCollection*(): Collection[mongo.Mongo] = 
+proc getMongoUsersCollection*(): MongoCollections = 
   var
     m: mongo.Mongo = newMongoWithURI("mongodb://sas:sas@localhost:27017/test")
     # mBase: MongoBase = m.slaveOk(true).allowPartial(false)
 
   discard m.connect()
 
-  result =  m["test"]["users2"]
+  result.users =  m["test"]["users"]
+  result.tasks =  m["test"]["tasks"]
 
 

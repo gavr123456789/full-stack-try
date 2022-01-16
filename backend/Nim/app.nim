@@ -5,9 +5,9 @@ import ./types
 import ./mongoUtils
 
 # initialize data
-method extend(ctx: UserContext) =
+method extend(ctx: MongoContext) =
   ctx.data = 999
-  ctx.collection = getMongoCollection()
+  ctx.collections = getMongoUsersCollection()
 
 
 let
@@ -23,7 +23,7 @@ let
 var app = newApp(settings = settings)
 
 app.get("/user/{name}", find)
-app.post("/user/{name}", save)
+app.post("/user/create", save)
 app.delete("/user/{name}", delete)
 
-app.run(UserContext)
+app.run(MongoContext)
