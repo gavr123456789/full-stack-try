@@ -1,8 +1,7 @@
+import std/[tables, strformat]
 import prologue
-import nimongo/bson
-import nimongo/mongo 
 import ./types
-
+import jsony
 
 proc find*(ctx: Context) {.gcsafe, async.} = 
   let ctx = InMemoryContext(ctx)
@@ -16,20 +15,37 @@ proc find*(ctx: Context) {.gcsafe, async.} =
     resp "not found"
 
 proc save*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = MongoContext(ctx)
-  let nameParam = ctx.getPathParams("name")
-  let finded = ctx.collection.find(bson.`%*`({"name": nameParam})).all()
+  let 
+    ctx = InMemoryContext(ctx)
+    body = ctx.request.body
+    user = body.fromJson(UserDto)
+  var 
+    collection = ctx.collection
+  
+  collection[user.name] = user
+  await switch(ctx)
 
-  if finded.len == 0:
-    let x = ctx.collection.insert( bson.`%*`({"name": nameParam}))
-    if x.ok: resp "created"
 
-  else:
-    if ctx.collection.update(finded[0], bson.`%*`({"name": nameParam}), false, false).ok:
-      resp "updated"
+  resp &"created/updated in memory, collection = {collection}"
+
 
 proc delete*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = MongoContext(ctx)
+  let ctx = InMemoryContext(ctx)
+  # var collection = ctx.collection
   let nameParam = ctx.getPathParams("name")
-  ctx.collection.remove bson.`%*` {"name": nameParam}
-  resp "sas"
+
+  echo "delete, current collection = ", ctx.collection
+  echo "nameParam != '' = ", nameParam != ""
+  echo "collection.contains nameParam = ", ctx.collection.contains nameParam
+
+
+  if nameParam != "" and ctx.collection.contains nameParam:
+    ctx.collection.del nameParam
+    resp &"{nameParam} delete"
+  else:
+    resp &"{nameParam} not found, collection = {ctx.collection}"
+
+
+proc login*(ctx: Context) {.gcsafe, async.} =
+  echo "sas"
+  resp "login"

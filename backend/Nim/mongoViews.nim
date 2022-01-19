@@ -14,11 +14,12 @@ proc find*(ctx: Context) {.gcsafe, async.} =
     resp "not found"
 
 proc save*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = MongoContext(ctx)
-  let body = ctx.request.body
-  let user = body.fromJson(UserDto)
-  let bsonUser = bson.`%*`({"name": user.name, "login": user.login, "password": user.password})
-  let finded = ctx.collections.users.find(bson.`%*`({"name": user.name})).all()
+  let 
+    ctx = MongoContext(ctx)
+    body = ctx.request.body
+    user = body.fromJson(UserDto)
+    bsonUser = bson.`%*`({"name": user.name, "login": user.login, "password": user.password})
+    finded = ctx.collections.users.find(bson.`%*`({"name": user.name})).all()
 
   if finded.len == 0:
     let x = ctx.collections.users.insert(bsonUser)
@@ -33,3 +34,21 @@ proc delete*(ctx: Context) {.gcsafe, async.} =
   let nameParam = ctx.getPathParams("name")
   ctx.collections.users.remove bson.`%*` {"name": nameParam}
   resp "sas"
+
+proc login*(ctx: Context) {.gcsafe, async.} = 
+  let 
+    ctx = MongoContext(ctx)
+    body = ctx.request.body
+    user = body.fromJson(UserDto)
+    bsonUser = bson.`%*`({"login": user.login, "password": user.password})
+    finded = ctx.collections.users.find(bsonUser).all()
+
+
+  if finded.len != 0:
+    ctx.response.code = Http200
+    ctx.response.body = "logined"
+    resp ctx.response
+  else:
+    ctx.response.code = Http401
+    ctx.response.body = "User not found"
+    resp ctx.response

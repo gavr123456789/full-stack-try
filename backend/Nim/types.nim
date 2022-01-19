@@ -23,6 +23,6 @@ type
 
   InMemoryContext* = ref object of Context
     data*: int
-    collection*: Table[string, UserDto] # name to user
+    collection*: TableRef[string, UserDto] # name to user
 
 

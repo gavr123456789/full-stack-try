@@ -1,13 +1,25 @@
 import prologue
-
-import ./mongoViews
 import ./types
 import ./mongoUtils
+# import prologue/middlewares/cors
+import tables
+const inMemory = true
+when inMemory:
+  import ./inMemoryViews
+  method extend(ctx: InMemoryContext) =
+    echo "extend!!!"
+    ctx.data = 999
+    # ctx.collection = TableRef[string, UserDto]()    
+    ctx.collection = {"1": UserDto(name: "1", login: "login", password: "123123")}.newTable    
+
+else:
+  import ./mongoViews
+  method extend(ctx: MongoContext) =
+    ctx.data = 999
+    ctx.collections = getMongoUsersCollection()
 
 # initialize data
-method extend(ctx: MongoContext) =
-  ctx.data = 999
-  ctx.collections = getMongoUsersCollection()
+
 
 
 let
@@ -22,8 +34,12 @@ let
 
 var app = newApp(settings = settings)
 
+
 app.get("/user/{name}", find)
 app.post("/user/create", save)
+app.post("/login", login)
 app.delete("/user/{name}", delete)
-
-app.run(MongoContext)
+when inMemory:
+  app.run(InMemoryContext)
+else:
+  app.run(MongoContext)
