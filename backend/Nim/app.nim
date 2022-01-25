@@ -3,7 +3,7 @@ import ./types
 import ./mongoUtils
 # import prologue/middlewares/cors
 import tables
-const inMemory = true
+const inMemory = false
 when inMemory:
   import ./inMemoryViews
   method extend(ctx: InMemoryContext) =

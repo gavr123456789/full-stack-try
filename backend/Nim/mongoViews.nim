@@ -3,6 +3,13 @@ import nimongo/bson
 import nimongo/mongo 
 import ./types
 import jsony
+import mongoUtils
+
+
+# temp https://github.com/planety/prologue/issues/149
+
+let x = getMongoUsersCollection()
+
 
 proc find*(ctx: Context) {.gcsafe, async.} = 
   let ctx = MongoContext(ctx)
@@ -29,11 +36,17 @@ proc save*(ctx: Context) {.gcsafe, async.} =
     if ctx.collections.users.update(finded[0], bsonUser, false, false).ok:
       resp "updated"
 
+var sas {.threadvar.}: string
+sas = "hh"
+
+
 proc delete*(ctx: Context) {.gcsafe, async.} = 
   let ctx = MongoContext(ctx)
   let nameParam = ctx.getPathParams("name")
   ctx.collections.users.remove bson.`%*` {"name": nameParam}
-  resp "sas"
+  sas = sas & $1
+  echo sas
+  resp "sas" & $sas
 
 proc login*(ctx: Context) {.gcsafe, async.} = 
   let 
