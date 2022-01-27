@@ -1,11 +1,8 @@
-export interface LoginStoreInit {
+export interface LoginStoreState {
   isLogIn: boolean
+  secretKey: string | null
 }
 
-export interface LoginDto {
-  login: string
-  password: string
-}
 
 
 // export type NoOperation = {

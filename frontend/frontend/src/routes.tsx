@@ -13,6 +13,8 @@ export default (
     <Route path="/" element={<LoginPage />} />
     <Route path="/home" element={<Home />} >
       <Route path="count" element={<Counter />} />
+      <Route path="todos" element={<>sas!!!</>} />
+      <Route path="sas" element={<>sas!!!</>} />
     </Route>
    
     <Route path="*" element={<NotFound />} />

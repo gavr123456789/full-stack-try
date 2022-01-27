@@ -17,7 +17,8 @@ export const MenuComponent: FC = () => {
         <Link to="count">Count</Link>
       </Menu.Item>
       <Menu.Item key="2" icon={<DesktopOutlined />}>
-        Option 2
+        <Link to="todos">Todos</Link>
+
       </Menu.Item>
       <SubMenu key="sub1" icon={<UserOutlined />} title="User">
         <Menu.Item key="3">Tom</Menu.Item>

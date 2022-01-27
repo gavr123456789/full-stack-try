@@ -1,13 +1,13 @@
 import { Form, Input, Button, Checkbox } from 'antd';
 import { FC } from 'react';
-import { login } from './model';
-import { LoginDto } from './types';
+import { LoginDto } from '../../api/login/dto';
+import { loginFx } from './model';
 
 export const Login: FC = () => {
   const onFinish = (loginDto: LoginDto) => {
     console.log('Success:', loginDto);
     
-    login(loginDto)
+    loginFx(loginDto)
   };
 
   const onFinishFailed = (errorInfo: any) => {
