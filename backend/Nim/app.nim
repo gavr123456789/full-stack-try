@@ -35,10 +35,10 @@ let
 var app = newApp(settings = settings)
 
 
-app.get("/user/{name}", find)
-app.post("/user/create", save)
+app.get("/user/{name}", findUser)
+app.post("/user/create", saveUser)
 app.post("/login", login)
-app.delete("/user/{name}", delete)
+app.delete("/user/{name}", deleteUser)
 when inMemory:
   app.run(InMemoryContext)
 else:

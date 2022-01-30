@@ -11,7 +11,7 @@ import mongoUtils
 let x = getMongoUsersCollection()
 
 
-proc find*(ctx: Context) {.gcsafe, async.} = 
+proc findUser*(ctx: Context) {.gcsafe, async.} = 
   let ctx = MongoContext(ctx)
   let nameParam = ctx.getPathParams("name")
   let finded = ctx.collections.users.find(bson.`%*`({"name": nameParam})).all()
@@ -20,7 +20,16 @@ proc find*(ctx: Context) {.gcsafe, async.} =
   else: 
     resp "not found"
 
-proc save*(ctx: Context) {.gcsafe, async.} = 
+proc findTask*(ctx: Context) {.gcsafe, async.} = 
+  let ctx = MongoContext(ctx)
+  let nameParam = ctx.getPathParams("name")
+  let finded = ctx.collections.tasks.find(bson.`%*`({"name": nameParam})).all()
+  if finded.len != 0:
+    resp $finded
+  else: 
+    resp "not found"
+
+proc saveUser*(ctx: Context) {.gcsafe, async.} = 
   let 
     ctx = MongoContext(ctx)
     body = ctx.request.body
@@ -36,17 +45,15 @@ proc save*(ctx: Context) {.gcsafe, async.} =
     if ctx.collections.users.update(finded[0], bsonUser, false, false).ok:
       resp "updated"
 
-var sas {.threadvar.}: string
-sas = "hh"
 
-
-proc delete*(ctx: Context) {.gcsafe, async.} = 
+proc deleteUser*(ctx: Context) {.gcsafe, async.} = 
   let ctx = MongoContext(ctx)
   let nameParam = ctx.getPathParams("name")
   ctx.collections.users.remove bson.`%*` {"name": nameParam}
-  sas = sas & $1
-  echo sas
-  resp "sas" & $sas
+  resp "sas"
+
+
+
 
 proc login*(ctx: Context) {.gcsafe, async.} = 
   let 

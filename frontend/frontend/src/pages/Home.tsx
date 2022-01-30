@@ -14,7 +14,7 @@ import { FC } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { Login } from "../features/Login/Login";
 import { $counter } from "../features/Counter";
-import { MenuComponent } from "./layout/menu";
+import { MenuComponent } from "./layout/Menu";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -55,14 +55,11 @@ const Home: FC = (): JSX.Element => {
             className="site-layout-background"
             style={{ padding: 24, minHeight: 360 }}
           >
-            Bill is a cat.
-            <Login></Login>
-            {/* <Link to="count">Expenses</Link> */}
             <Outlet />
           </div>
         </Content>
         {/* <Footer style={{ textAlign: "center" }}>
-          Ant Design ©2018 Created by Ant UED
+          Footer text
         </Footer> */}
       </Layout>
     </Layout>

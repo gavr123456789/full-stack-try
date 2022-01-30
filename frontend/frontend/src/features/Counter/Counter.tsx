@@ -13,7 +13,7 @@ export const Counter: React.FC = () => {
       >
         +
       </Button>
-      <span className="counter__label">{counter}</span>
+      <span style={{margin: 5}}>{counter}</span>
       <Button
         aria-label="Decrement value"
         onClick={() => decrement()}
