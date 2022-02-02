@@ -27,11 +27,12 @@ export const MenuComponent: FC = () => {
     <Menu theme="dark" defaultSelectedKeys={[defaultSelected]} mode="inline">
 
       <Menu.Item  key="1" icon={<PieChartOutlined />}>
-        Nothing1
+        <NavLink to="verstkatests">Verstka test</NavLink>
       </Menu.Item>
 
       <Menu.Item key="2" icon={<DesktopOutlined />}>
-        Nothing2
+      <NavLink to="dela">Dela</NavLink>
+
       </Menu.Item>
 
       <SubMenu key="sub1" icon={<UserOutlined />} title="User">

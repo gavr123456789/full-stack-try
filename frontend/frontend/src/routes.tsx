@@ -5,6 +5,8 @@ import Home from "./pages/Home";
 import { Counter } from "./features/Counter";
 import { LoginPage } from "./pages/Login";
 import { TodoList } from "./features/TodoList/TodoList";
+import { VerstkaTest } from "./features/VerstkaTests/VerstkaTests";
+import { Dela } from "./features/Dela/Dela";
 
 export default (
   <Routes >
@@ -20,7 +22,9 @@ export default (
         />
       } 
       />
-      <Route path="sas" element={<>sas!!!</>} />
+      <Route path="verstkatests" element={<VerstkaTest />} />
+      <Route path="dela" element={<Dela />} />
+
     </Route>
    
     <Route path="*" element={<NotFound />} />
