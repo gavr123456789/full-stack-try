@@ -3,7 +3,7 @@ import ./types
 import ./mongoUtils
 # import prologue/middlewares/cors
 import tables
-const inMemory = false
+const inMemory = true
 when inMemory:
   import ./inMemoryViews
   method extend(ctx: InMemoryContext) =
@@ -20,15 +20,13 @@ else:
 
 # initialize data
 
-
-
 let
   env = loadPrologueEnv(".env")
   settings = newSettings(
     appName = env.getOrDefault("appName", "Prologue"),
     debug = env.getOrDefault("debug", true),
     port = Port(env.getOrDefault("port", 8080)),
-    secretKey = env.getOrDefault("secretKey", "")
+    secretKey = env.getOrDefault("secretKey", "2323")
   )
 
 

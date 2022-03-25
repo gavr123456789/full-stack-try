@@ -1,5 +1,5 @@
 import nimongo/bson
-import nimongo.mongo 
+import nimongo/mongo 
 import ./types
 
 

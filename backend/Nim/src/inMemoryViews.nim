@@ -3,10 +3,23 @@ import prologue
 import ./types
 import jsony
 
+var inMemoryTable {. threadVar .}: TableRef[string, UserDto]
+
+proc initThreadVar(): TableRef[string, UserDto] = 
+  if inMemoryTable == nil:
+    echo "thread var is nil, initialization..."
+    inMemoryTable = {"1": UserDto(name: "1", login: "login", password: "123123")}.newTable 
+    return inMemoryTable
+  else:
+    echo "thread var not nil"
+
+    return inMemoryTable
+
 proc findUser*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = InMemoryContext(ctx)
+  # let ctx = InMemoryContext(ctx)
+  let collection = initThreadVar()
   let nameParam = ctx.getPathParams("name")
-  let finded = ctx.collection.getOrDefault(nameParam)#ctx.collection.findUser(bson.`%*`({"name": nameParam})).all()
+  let finded = collection.getOrDefault(nameParam)#ctx.collection.findUser(bson.`%*`({"name": nameParam})).all()
   
   
   if finded.name != "":
@@ -16,11 +29,11 @@ proc findUser*(ctx: Context) {.gcsafe, async.} =
 
 proc saveUser*(ctx: Context) {.gcsafe, async.} = 
   let 
-    ctx = InMemoryContext(ctx)
+    # ctx = InMemoryContext(ctx)
     body = ctx.request.body
     user = body.fromJson(UserDto)
   var 
-    collection = ctx.collection
+    collection = initThreadVar()
   
   collection[user.name] = user
   await switch(ctx)
