@@ -31,7 +31,6 @@ const Was = (counter: number) => {
 };
 
 const Home: FC = (): JSX.Element => {
-  const counter = useStore($counter);
 
   const onCollapse = (collapsed: boolean) => {
     console.log(collapsed);

@@ -19,7 +19,7 @@ proc findUser*(ctx: Context) {.gcsafe, async.} =
   # let ctx = InMemoryContext(ctx)
   let collection = initThreadVar()
   let nameParam = ctx.getPathParams("name")
-  let finded = collection.getOrDefault(nameParam)#ctx.collection.findUser(bson.`%*`({"name": nameParam})).all()
+  let finded = collection.getOrDefault(nameParam) #ctx.collection.findUser(bson.`%*`({"name": nameParam})).all()
   
   
   if finded.name != "":
@@ -36,7 +36,6 @@ proc saveUser*(ctx: Context) {.gcsafe, async.} =
     collection = initThreadVar()
   
   collection[user.name] = user
-  await switch(ctx)
 
 
   resp &"created/updated in memory, collection = {collection}"
