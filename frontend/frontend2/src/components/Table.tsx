@@ -1,5 +1,6 @@
 import React, { FC, useMemo } from 'react';
 import MaterialReactTable, { MRT_ColumnDef } from 'material-react-table';
+import { Button } from '@mui/material';
 
 type Person = {
   name: {
@@ -98,12 +99,71 @@ const Example: FC = () => {
       <MaterialReactTable
         columns={columns}
         data={data}
-        enableColumnResizing
-        defaultColumn={{
-          maxSize: 400,
-          minSize: 80,
-          size: 150, //default size is usually 180
+
+        enableRowSelection
+        renderTopToolbarCustomActions={({ table }) => {
+
+          const handleDeactivate = () => {
+            table.getSelectedRowModel().flatRows.map((row) => {
+              alert('deactivating ' + row.original.city);
+            });
+          };
+  
+          const handleActivate = () => {
+            table.getSelectedRowModel().flatRows.map((row) => {
+              console.log(row.original.city);
+              
+              // alert('activating ' + row// .getValue('name'));
+            });
+          };
+  
+          const handleContact = () => {
+            table.getSelectedRowModel().flatRows.map((row) => {
+              alert('contact ' + row.original.city);
+            });
+          };
+  
+          return (
+  
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+  
+              <Button
+                color="error"
+                disabled={table.getSelectedRowModel().flatRows.length === 0}
+                onClick={handleDeactivate}
+                variant="contained"
+              >
+                Deactivate
+              </Button>
+  
+              <Button
+                color="success"
+                disabled={table.getSelectedRowModel().flatRows.length === 0}
+                onClick={handleActivate}
+                variant="contained"
+              >
+                Activate
+              </Button>
+              <Button
+                color="info"
+                disabled={table.getSelectedRowModel().flatRows.length === 0}
+                onClick={handleContact}
+                variant="contained"
+              >
+                Contact
+              </Button>
+  
+            </div>
+  
+          );
+  
         }}
+        enableColumnResizing
+        // defaultColumn={{
+        //   maxSize: 100,
+        //   minSize: 40,
+        //   size: 40, //default size is usually 180
+        // }}
         columnResizeMode="onChange"
       />
       {/* sds */}
