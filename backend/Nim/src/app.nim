@@ -3,7 +3,10 @@ import ./types
 import ./mongoUtils
 # import prologue/middlewares/cors
 import tables
-const inMemory = true
+
+const inMemory = false
+const isSqlite = true
+
 when inMemory:
   import ./inMemoryViews
   method extend(ctx: InMemoryContext) =
@@ -11,6 +14,9 @@ when inMemory:
     ctx.data = 999
     # ctx.collection = TableRef[string, UserDto]()    
     ctx.collection = {"1": UserDto(name: "1", login: "login", password: "123123")}.newTable    
+
+elif isSqlite:
+  import ./sqliteViews
 
 else:
   import ./mongoViews
@@ -34,6 +40,7 @@ var app = newApp(settings = settings)
 
 
 app.get("/user/{name}", findUser)
+app.get("/getAllUsers", getAllUsers)
 app.post("/user/create", saveUser)
 app.post("/login", login)
 app.delete("/user/{name}", deleteUser)

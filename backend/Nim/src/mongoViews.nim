@@ -12,9 +12,11 @@ let x = getMongoUsersCollection()
 
 
 proc findUser*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = MongoContext(ctx)
-  let nameParam = ctx.getPathParams("name")
-  let finded = ctx.collections.users.find(bson.`%*`({"name": nameParam})).all()
+  let 
+    ctx = MongoContext(ctx)
+    nameParam = ctx.getPathParams("name")
+    finded = ctx.collections.users.find(bson.`%*`({"name": nameParam})).all()
+  
   if finded.len != 0:
     resp $finded
   else: 
