@@ -23,7 +23,7 @@ type FlattenPairs<T> =
     ? [K, T[K]] // создаем пару название ключа: тип ключа
     : FlattenPairs<T[K]> // иначе рекурсируем это дело
   } [keyof T] & [PropertyKey, Primitive]
-type Flatten<T> = {[P in FlattenPairs<T> as P[0]]: P[1]} // тип с ключами[0] и типами ключей[1], то есть объектом
+export type Flatten<T> = {[P in FlattenPairs<T> as P[0]]: P[1]} // тип с ключами[0] и типами ключей[1], то есть объектом
 type eee = Flatten<Person>
 
 // const a: eee = {
