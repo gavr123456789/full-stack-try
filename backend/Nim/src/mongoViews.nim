@@ -5,13 +5,14 @@ import ./types
 import jsony
 import mongoUtils
 
+# Old realization, need update
 
 # temp https://github.com/planety/prologue/issues/149
 
-let x = getMongoUsersCollection()
+discard getMongoUsersCollection()
 
 
-proc findUser*(ctx: Context) {.gcsafe, async.} = 
+proc findPerson*(ctx: Context) {.gcsafe, async.} = 
   let 
     ctx = MongoContext(ctx)
     nameParam = ctx.getPathParams("name")
@@ -23,12 +24,12 @@ proc findUser*(ctx: Context) {.gcsafe, async.} =
     resp "not found"
 
 
-proc saveUser*(ctx: Context) {.gcsafe, async.} = 
+proc savePerson*(ctx: Context) {.gcsafe, async.} = 
   let 
     ctx = MongoContext(ctx)
     body = ctx.request.body
-    user = body.fromJson(UserDto)
-    bsonUser = bson.`%*`({"name": user.name, "login": user.login, "password": user.password})
+    user = body.fromJson(PersonDto)
+    bsonUser = bson.`%*`({"name": user.name, "age": user.age})
     finded = ctx.collections.users.find(bson.`%*`({"name": user.name})).all()
 
   if finded.len == 0:
@@ -40,7 +41,7 @@ proc saveUser*(ctx: Context) {.gcsafe, async.} =
       resp "updated"
 
 
-proc deleteUser*(ctx: Context) {.gcsafe, async.} = 
+proc deletePerson*(ctx: Context) {.gcsafe, async.} = 
   let ctx = MongoContext(ctx)
   let nameParam = ctx.getPathParams("name")
   ctx.collections.users.remove bson.`%*` {"name": nameParam}
@@ -48,13 +49,12 @@ proc deleteUser*(ctx: Context) {.gcsafe, async.} =
 
 
 
-
 proc login*(ctx: Context) {.gcsafe, async.} = 
   let 
     ctx = MongoContext(ctx)
     body = ctx.request.body
-    user = body.fromJson(UserDto)
-    bsonUser = bson.`%*`({"login": user.login, "password": user.password})
+    user = body.fromJson(PersonDto)
+    bsonUser = bson.`%*`({"name": user.name})
     finded = ctx.collections.users.find(bsonUser).all()
 
 
@@ -66,38 +66,3 @@ proc login*(ctx: Context) {.gcsafe, async.} =
     ctx.response.code = Http401
     ctx.response.body = "User not found"
     resp ctx.response
-
-
-### Tasks
-
-proc findTask*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = MongoContext(ctx)
-  let nameParam = ctx.getPathParams("name")
-  let finded = ctx.collections.tasks.find(bson.`%*`({"name": nameParam})).all()
-  if finded.len != 0:
-    resp $finded
-  else: 
-    resp "not found"
-
-proc saveTask*(ctx: Context) {.gcsafe, async.} = 
-  let 
-    ctx = MongoContext(ctx)
-    body = ctx.request.body
-    user = body.fromJson(UserDto)
-    bsonUser = bson.`%*`({"name": user.name, "login": user.login, "password": user.password})
-    finded = ctx.collections.tasks.find(bson.`%*`({"name": user.name})).all()
-
-  if finded.len == 0:
-    let x = ctx.collections.tasks.insert(bsonUser)
-    if x.ok: resp "created"
-
-  else:
-    if ctx.collections.tasks.update(finded[0], bsonUser, false, false).ok:
-      resp "updated"
-
-
-proc deleteTask*(ctx: Context) {.gcsafe, async.} = 
-  let ctx = MongoContext(ctx)
-  let nameParam = ctx.getPathParams("name")
-  ctx.collections.tasks.remove bson.`%*` {"name": nameParam}
-  resp "sas"

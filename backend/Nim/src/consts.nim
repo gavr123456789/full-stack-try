@@ -1,0 +1,1 @@
+const PATH_TO_SQLITE_DB* = "data/data.sqlite"

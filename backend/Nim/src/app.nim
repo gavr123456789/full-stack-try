@@ -4,19 +4,22 @@ import ./mongoUtils
 # import prologue/middlewares/cors
 import tables
 
-const inMemory = false
-const isSqlite = true
+type DbType = enum 
+  inMemory, sqlite, mongo
 
-when inMemory:
+const dbType = sqlite
+
+when dbType == inMemory:
   import ./inMemoryViews
   method extend(ctx: InMemoryContext) =
-    echo "extend!!!"
     ctx.data = 999
-    # ctx.collection = TableRef[string, UserDto]()    
-    ctx.collection = {"1": UserDto(name: "1", login: "login", password: "123123")}.newTable    
+    # ctx.collection = TableRef[string, PersonDto]()    
+    ctx.collection = {"1": PersonDto(name: "sas", age: 1)}.newTable    
 
-elif isSqlite:
+elif dbType == sqlite:
   import ./sqliteViews
+  import utils/sqliteInitDb
+  createSqliteDbIfNotExist()
 
 else:
   import ./mongoViews
@@ -24,7 +27,6 @@ else:
     ctx.data = 999
     ctx.collections = getMongoUsersCollection()
 
-# initialize data
 
 let
   env = loadPrologueEnv(".env")
@@ -39,12 +41,12 @@ let
 var app = newApp(settings = settings)
 
 
-app.get("/user/{name}", findUser)
-app.get("/getAllUsers", getAllUsers)
-app.post("/user/create", saveUser)
+app.get("/person/{name}", findPerson)
+app.get("/getAllPersons", getAllPersons)
+app.post("/person/create", savePerson)
 app.post("/login", login)
-app.delete("/user/{name}", deleteUser)
-when inMemory:
+app.delete("/person/{name}", deletePerson)
+when dbType == inMemory:
   app.run(InMemoryContext)
 else:
   app.run(MongoContext)

@@ -3,9 +3,9 @@ import strUtils
 import prologue
 import jsony
 import types
+import consts
 
 
-const PATH_TO_DB = "data/data.sqlite"
 
 # type Person = object 
 #   first_name: string
@@ -15,29 +15,30 @@ const PATH_TO_DB = "data/data.sqlite"
 var db {. threadVar .}: DBConn
 
 proc initThreadVar(): DBConn = 
-  db = open(PATH_TO_DB, "", "", "")
+  db = open(PATH_TO_SQLITE_DB, "", "", "")
   result = db
 
 
 ### Service
 
-proc findUser*(ctx: Context) {.gcsafe, async.} =
+proc findPerson*(ctx: Context) {.gcsafe, async.} =
+  const findSql = sql"SELECT age FROM persons WHERE name = ?"
   let 
     db = initThreadVar()
     nameParam = ctx.getPathParams("name")
-
     row = db.getRow(
-      sql"SELECT login, password FROM users WHERE name = ?",
+      findSql,
       nameParam
     )
-    user = UserDto(name: nameParam, login: row[0], password: row[1]) 
+    person = PersonDto(name: nameParam, age: row[0].parseInt()) 
+
   db.close()
 
-  if user.login.len != 0:
-    resp `$` %*user
+  if person.age != 0:
+    resp `$` %*person
   else:
     ctx.response.code = Http404
-    ctx.response.body = "User not found"
+    ctx.response.body = "person not found"
     resp ctx.response
 
 
@@ -45,56 +46,49 @@ proc login*(ctx: Context) {.gcsafe, async.} =
   echo "login"
   resp "login"
 
-proc deleteUser*(ctx: Context) {.gcsafe, async.} =
-  echo "deleteUser"
-  resp "deleteUser"
+proc deletePerson*(ctx: Context) {.gcsafe, async.} =
+  const deleteSql = sql"delete from persons where name = ?"
+  let 
+    db = initThreadVar()
+    nameParam = ctx.getPathParams("name")
+    
+  db.exec(deleteSql, nameParam)
+  db.close()
 
-proc saveUser*(ctx: Context) {.gcsafe, async.} =
+proc savePerson*(ctx: Context) {.gcsafe, async.} =
+  const insertSql = sql"insert into persons (name, age) values(?, ?);"
   let 
     db = initThreadVar()
     body = ctx.request.body
-    user = body.fromJson(UserDto)
+    person = body.fromJson(PersonDto)
     id = db.tryInsertId( 
-      sql"insert into users (name, login, password) values(?, ?, ?);",  
-      user.name, user.login, user.password
+      insertSql,  
+      person.name, person.age
     )
   echo "saved id: ", id
   db.close()
+  if id != -1:
 
-proc getAllUsers*(ctx: Context) {.gcsafe, async.} =
+    resp $id
+  else:
+    resp "Error when save new person, may be its name not unique"
+
+
+proc getAllPersons*(ctx: Context) {.gcsafe, async.} =
   let 
     db = initThreadVar()
-  var result: seq[UserDto] = @[]
-  for x in db.fastRows(sql"SELECT * FROM users"):
-    assert(x.len == 4)
-    result.add UserDto(name: x[1],login: x[2], password: x[3])
+  var result: seq[PersonDto] = @[]
+  for x in db.fastRows(sql"SELECT * FROM persons"):
+    assert(x.len == 3)
+    result.add PersonDto(id: x[0].parseInt, name: x[1], age: x[2].parseInt)
   if result.len > 0:
     ctx.response.code = Http200
     ctx.response.body = `$` %*result
     resp ctx.response
   else:
     ctx.response.code = Http404
-    ctx.response.body = "Users not found"
+    ctx.response.body = "persons not found"
     resp ctx.response
   db.close()
-
-### DB utils
-# proc getAllPersons(): seq[Person] =
-#   let db = initThreadVar()
-#   for x in db.fastRows(sql"SELECT * FROM persons"):
-#     assert(x.len == 4)
-#     result.add Person(first_name: x[1],last_name: x[2], age: parseInt(x[3]))
-#   db.close()
-
-
-# proc insertPerson(person: Person): int64 =
-#   let db = initThreadVar()
-#   result = db.tryInsertId(
-#     sql"insert into persons (first_name, last_name, age) values(?, ?, ?);", 
-#     person.first_name, person.last_name, person.age
-#   )
-#   db.close()
-
-
 
 
