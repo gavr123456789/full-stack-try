@@ -1,27 +1,37 @@
-import React, {FC, useCallback, useMemo, useState} from 'react';
+import React, {FC, useCallback, useEffect, useMemo, useState} from 'react';
 import MaterialReactTable, {MRT_ColumnDef} from 'material-react-table';
 import {Button} from '@mui/material';
 import {FormDialog} from "./FormDialog";
 import {EMPTY_PERSON, Person} from "./types";
-
-//nested data is ok, see accessorKeys in ColumnDef below
-const mocks: Person[] = [
-  {id: 1, age: 1, name: {firstName: "first sas", lastName: "second sas"}},
-  {id: 2, age: 2, name: {firstName: "first sas", lastName: "second sas"}},
-  {id: 3, age: 3, name: {firstName: "first sas", lastName: "second sas"}},
-  {id: 4, age: 4, name: {firstName: "first sas", lastName: "second sas"}},
-  {id: 5, age: 5, name: {firstName: "first sas", lastName: "second sas"}},
-]
+import {addNewPersons, getAllPersons} from "../../services/personService";
 
 
+
+console.log("sasss", process.env.REACT_APP_BASE_URL)
 
 const PersonTable: FC = () => {
 
-  const [data, setData] = useState(mocks)
+  const [data, setData] = useState<Person[]>([])
 
-  //should be memoized or stable
+
+  useEffect(() => {
+    reload().then(_ => {
+      console.log("Person table data reloaded")
+    })
+  }, [])
+
+  const reload = async () => {
+    const persons = await getAllPersons()
+    setData(persons)
+  }
+
+  // should be memoized or stable
   const columns = useMemo<MRT_ColumnDef<Person>[]>(
     () => [
+      {
+        accessorKey: 'nick',
+        header: 'Nick name',
+      },
       {
         accessorKey: 'name.firstName',
         header: 'First Name',
@@ -38,11 +48,11 @@ const PersonTable: FC = () => {
     [],
   );
 
-  const addNewPerson = useCallback((person: Person) => {
-    console.log("added person: ", person)
-    const realTempId = 222
-    person.id = realTempId
-    setData([...data, person])
+
+  const addNewPerson = useCallback(async (person: Person) => {
+    const id = await addNewPersons(person)
+    await reload()
+    return id
   }, [])
 
   const editPerson = useCallback((person: Person) => {

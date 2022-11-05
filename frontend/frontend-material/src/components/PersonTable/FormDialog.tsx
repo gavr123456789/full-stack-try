@@ -5,27 +5,29 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import React, {ChangeEvent, FC, useEffect} from "react";
-import {EMPTY_PERSON_ROW, Person, PersonRow} from "./types";
+import {convertPersonToRow, convertFlatToPerson, EMPTY_PERSON_ROW, Person, PersonFlat} from "./types";
 import {Box} from '@mui/material';
 import {nameOf} from "../../utils/typeUtils";
 
+type SubmitPersonFunc = (person: Person) => Promise<number>
 type FormDialogProps =
   {
     kind: "add"
-    submitNewPerson: (person: Person) => void,
+    submitNewPerson: SubmitPersonFunc,
     text: "Add new person"
 
   } |
   {
     kind: "edit"
     disabled: boolean, // only edit can be disabled
-    submitNewPerson: (person: Person) => void,
+    submitNewPerson: SubmitPersonFunc,
     text: "Edit person"
     person: Person
   }
 
 
 type Event = ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+
 
 function fieldIsEmpty(text: string) {
   return text.length < 1
@@ -38,8 +40,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
 
   useEffect(() => {
     if (props.kind === "edit") {
-      const {name: {firstName, lastName}, age, id} = props.person
-      setFormValues({age, firstName, lastName, id})
+      setFormValues(convertPersonToRow(props.person))
     }
   }, [])
 
@@ -65,16 +66,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
 
 
   function handleSubmit() {
-    const {age, lastName, firstName} = formValues
-    const newPerson: Person = {
-      id: 0,
-      age,
-      name: {
-        firstName,
-        lastName
-      }
-    }
-    submitNewPerson(newPerson)
+    submitNewPerson(convertFlatToPerson(formValues))
     handleClose()
   }
 
@@ -92,7 +84,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
 
             <TextField
               error={fieldIsEmpty(formValues.firstName)}
-              name={nameOf<PersonRow>("firstName")}
+              name={nameOf<PersonFlat>("firstName")}
               id="input-with-icon-textfield"
               label="First name"
               value={formValues.firstName}
@@ -102,7 +94,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
             <TextField
               error={fieldIsEmpty(formValues.lastName)}
 
-              name={nameOf<PersonRow>("lastName")}
+              name={nameOf<PersonFlat>("lastName")}
               id="input-with-icon-textfield"
               label="Last name"
               value={formValues.lastName}
@@ -110,8 +102,18 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
               variant="standard"
             />
             <TextField
+              error={fieldIsEmpty(formValues.lastName)}
+
+              name={nameOf<PersonFlat>("nick")}
+              id="input-with-icon-textfield"
+              label="Nick name"
+              value={formValues.nick}
+              onChange={handleInputChange}
+              variant="standard"
+            />
+            <TextField
               error={formValues.age < 1}
-              name={nameOf<PersonRow>("age")}
+              name={nameOf<PersonFlat>("age")}
               id="input-with-icon-textfield"
               label="Age"
               type="number"

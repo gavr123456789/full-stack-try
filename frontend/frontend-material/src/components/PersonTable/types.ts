@@ -6,6 +6,7 @@ export type Person = {
     firstName: string;
     lastName: string;
   };
+  nick: string
   age: number
 };
 
@@ -15,14 +16,41 @@ export const EMPTY_PERSON: Readonly<Person> = {
   name: {
     firstName: "",
     lastName: ""
+  },
+  nick: ""
+}
+
+export type PersonFlat = Flatten<Person>
+
+export const EMPTY_PERSON_ROW: Readonly<PersonFlat> = {
+  id: 0,
+  lastName: "",
+  firstName: "",
+  nick: "",
+  age: 1,
+}
+
+export function convertPersonToRow(person: Person): PersonFlat {
+  const {age, id, name: {firstName, lastName}, nick} = person
+  return {
+    age,
+    firstName,
+    lastName,
+    id,
+    nick
   }
 }
 
-export type PersonRow = Flatten<Person>
+export function convertFlatToPerson(person: PersonFlat): Person {
+  const {age, id, firstName, lastName, nick} = person
 
-export const EMPTY_PERSON_ROW: Readonly<PersonRow> = {
-  id: 0,
-  firstName: "",
-  lastName: "",
-  age: 1,
+  return {
+    age,
+    name: {
+      firstName,
+      lastName
+    },
+    id,
+    nick
+  }
 }

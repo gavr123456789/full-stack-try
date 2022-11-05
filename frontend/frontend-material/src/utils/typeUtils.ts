@@ -24,11 +24,13 @@ type FlattenPairs<T> =
     : FlattenPairs<T[K]> // иначе рекурсируем это дело
   } [keyof T] & [PropertyKey, Primitive]
 export type Flatten<T> = {[P in FlattenPairs<T> as P[0]]: P[1]} // тип с ключами[0] и типами ключей[1], то есть объектом
+type FlattenPairsNestedAreKnown<T> = {[K in keyof T]: K extends 'nested' ? FlattenPairs<T[K]> : [K, T[K]]}[keyof T]
+
 type eee = Flatten<Person>
 
 // const a: eee = {
 //   firstName: "",
-
+//
 // }
 
 // type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;
