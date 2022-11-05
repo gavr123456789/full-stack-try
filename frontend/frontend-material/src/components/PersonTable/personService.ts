@@ -1,5 +1,5 @@
 // for no, no pagination supported
-import {Person} from "../components/PersonTable/types";
+import {Person} from "./types";
 import axios from "axios";
 
 
@@ -52,13 +52,27 @@ export async function getAllPersons(): Promise<Person[]> {
   return []
 }
 
-export async function deletePerson(id: number): Promise<void> {
+export async function deletePerson(id: number[]): Promise<void> {
   try {
     await axios.delete<PersonResponse[]>(`/persons/${id}`)
   } catch (e) {
     alert(e)
   }
 }
+
+interface DeletePersonsRequest {
+  rowsIds: number[]
+}
+
+export async function deletePersons(rowsIds: number[]): Promise<void> {
+  const requestBody: DeletePersonsRequest = {rowsIds}
+  try {
+    (await axios.post<undefined, void, DeletePersonsRequest>('/persons/deleteMany', requestBody))
+  } catch (e) {
+    alert(e)
+  }
+}
+
 
 // posts
 export async function addNewPersons(person: Person): Promise<number> {

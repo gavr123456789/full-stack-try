@@ -1,18 +1,14 @@
 import React, {FC, useCallback, useEffect, useMemo, useState} from 'react';
-import MaterialReactTable, {MRT_ColumnDef} from 'material-react-table';
+import MaterialReactTable, {MRT_ColumnDef, MRT_Row} from 'material-react-table';
 import {Button} from '@mui/material';
 import {FormDialog} from "./FormDialog";
 import {EMPTY_PERSON, Person} from "./types";
-import {addNewPersons, getAllPersons} from "../../services/personService";
+import {addNewPersons, deletePersons, getAllPersons} from "./personService";
 
-
-
-console.log("sasss", process.env.REACT_APP_BASE_URL)
 
 const PersonTable: FC = () => {
 
   const [data, setData] = useState<Person[]>([])
-
 
   useEffect(() => {
     reload().then(_ => {
@@ -49,31 +45,29 @@ const PersonTable: FC = () => {
   );
 
 
-  const addNewPerson = useCallback(async (person: Person) => {
+  const addNewPersonCb = useCallback(async (person: Person) => {
     const id = await addNewPersons(person)
     await reload()
     return id
   }, [])
 
-  const editPerson = useCallback((person: Person) => {
+  const editPersonCb = useCallback((person: Person) => {
     console.log("added person: ", person)
     const realTempId = 222
     person.id = realTempId
     setData([...data, person])
   }, [])
 
-  const deletePerson = useCallback((person?: Person) => {
-    if (!person) return;
-
-    console.log("added person: ", person)
-
-    // get new data from server
-    setData([...data, person])
+  const deletePersonCb = useCallback(async (selectedRows: MRT_Row<Person>[]) => {
+    if (selectedRows.length === 0) return;
+    selectedRows.forEach(x => x.toggleSelected(false))
+    const persons = selectedRows.map(x => x.original.id)
+    await deletePersons(persons)
+    await reload()
   }, [])
 
   return (
-    <div>
-
+    <>
       <MaterialReactTable
         columns={columns}
         data={data}
@@ -83,14 +77,15 @@ const PersonTable: FC = () => {
 
 
           const currentRow = table.getSelectedRowModel().rows.at(0)?.original
+          const currentRows = table.getSelectedRowModel().rows
           return (
 
             <div style={{display: 'flex', gap: '0.5rem'}}>
 
-              <FormDialog submitNewPerson={addNewPerson} kind={"add"} text={"Add new person"}/>
+              <FormDialog submitNewPerson={addNewPersonCb} kind={"add"} text={"Add new person"}/>
 
               <FormDialog
-                submitNewPerson={addNewPerson}
+                submitNewPerson={addNewPersonCb}
                 kind={"edit"}
                 text={"Edit person"}
                 disabled={table.getSelectedRowModel().flatRows.length !== 1}
@@ -98,11 +93,10 @@ const PersonTable: FC = () => {
               />
 
 
-
               <Button
                 color="error"
                 disabled={table.getSelectedRowModel().flatRows.length === 0}
-                onClick={() => {deletePerson(currentRow)}}
+                onClick={() => {deletePersonCb(currentRows)}}
                 variant="outlined"
               >
                 Delete
@@ -112,18 +106,8 @@ const PersonTable: FC = () => {
           );
         }}
 
-        renderDetailPanel={({row}) => (
-          <Button>Sas</Button>
-        )}
-        // enableColumnResizing
-        // defaultColumn={{
-        //   maxSize: 100,
-        //   minSize: 40,
-        //   size: 40, //default size is usually 180
-        // }}
-        // columnResizeMode="onChange"
       />
-    </div>
+    </>
   );
 };
 
