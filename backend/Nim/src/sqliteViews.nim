@@ -5,13 +5,6 @@ import jsony
 import types
 import consts
 
-
-
-# type Person = object 
-#   first_name: string
-#   last_name: string
-#   age: int
-
 var db {. threadVar .}: DBConn
 
 proc initThreadVar(): DBConn = 
@@ -19,19 +12,19 @@ proc initThreadVar(): DBConn =
   result = db
 
 
-### Service
 
 proc findPerson*(ctx: Context) {.gcsafe, async.} =
-  const findSql = sql"SELECT age FROM persons WHERE name = ?"
+  const findSql = sql"SELECT name, age FROM persons WHERE nick = ?"
   let 
     db = initThreadVar()
-    nameParam = ctx.getPathParams("name")
+    nickParam = ctx.getPathParams("nick")
     row = db.getRow(
       findSql,
-      nameParam
+      nickParam
     )
-    person = PersonDto(name: nameParam, age: row[0].parseInt()) 
-
+    person = PersonDto(name: row[0], nick: nickParam, age: row[1].parseInt) 
+  echo "nickParam = ", nickParam
+  echo "row = ", row 
   db.close()
 
   if person.age != 0:
@@ -41,46 +34,46 @@ proc findPerson*(ctx: Context) {.gcsafe, async.} =
     ctx.response.body = "person not found"
     resp ctx.response
 
-
+# for future
 proc login*(ctx: Context) {.gcsafe, async.} =
   echo "login"
   resp "login"
 
 proc deletePerson*(ctx: Context) {.gcsafe, async.} =
-  const deleteSql = sql"delete from persons where name = ?"
+  const deleteSql = sql"delete from persons where nick = ?"
   let 
     db = initThreadVar()
-    nameParam = ctx.getPathParams("name")
+    nameParam = ctx.getPathParams("nick")
     
   db.exec(deleteSql, nameParam)
   db.close()
+  
 
 proc savePerson*(ctx: Context) {.gcsafe, async.} =
-  const insertSql = sql"insert into persons (name, age) values(?, ?);"
+  const insertSql = sql"insert into persons (name, nick, age) values(?, ?, ?);"
   let 
     db = initThreadVar()
     body = ctx.request.body
     person = body.fromJson(PersonDto)
     id = db.tryInsertId( 
       insertSql,  
-      person.name, person.age
+      person.name, person.nick, person.age
     )
   echo "saved id: ", id
   db.close()
   if id != -1:
-
     resp $id
   else:
-    resp "Error when save new person, may be its name not unique"
+    resp "Error when save new person, may be its nick not unique"
 
 
 proc getAllPersons*(ctx: Context) {.gcsafe, async.} =
   let 
     db = initThreadVar()
   var result: seq[PersonDto] = @[]
-  for x in db.fastRows(sql"SELECT * FROM persons"):
-    assert(x.len == 3)
-    result.add PersonDto(id: x[0].parseInt, name: x[1], age: x[2].parseInt)
+  for x in db.fastRows(sql"SELECT * FROM persons order by id"):
+    assert(x.len == 4)
+    result.add PersonDto(id: x[0].parseInt, name: x[1], nick: x[2], age: x[3].parseInt)
   if result.len > 0:
     ctx.response.code = Http200
     ctx.response.body = `$` %*result

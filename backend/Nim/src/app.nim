@@ -3,6 +3,7 @@ import ./types
 import ./mongoUtils
 # import prologue/middlewares/cors
 import tables
+import std/with
 
 type DbType = enum 
   inMemory, sqlite, mongo
@@ -33,19 +34,19 @@ let
   settings = newSettings(
     appName = env.getOrDefault("appName", "Prologue"),
     debug = env.getOrDefault("debug", true),
-    port = Port(env.getOrDefault("port", 8080)),
+    port = Port(env.getOrDefault("port", 8081)),
     secretKey = env.getOrDefault("secretKey", "2323")
   )
 
 
 var app = newApp(settings = settings)
 
-
-app.get("/person/{name}", findPerson)
-app.get("/getAllPersons", getAllPersons)
-app.post("/person/create", savePerson)
-app.post("/login", login)
-app.delete("/person/{name}", deletePerson)
+with app:
+  get("/person/{nick}", findPerson)
+  get("/getAllPersons", getAllPersons)
+  post("/person/add", savePerson)
+  post("/login", login)
+  delete("/person/{nick}", deletePerson)
 when dbType == inMemory:
   app.run(InMemoryContext)
 else:

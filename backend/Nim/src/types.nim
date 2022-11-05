@@ -14,6 +14,7 @@ type
 
   PersonDto* = object 
     name*: string # firstname space lastname
+    nick*: string
     age*: int
     id*: int
     
@@ -30,5 +31,12 @@ type
   InMemoryContext* = ref object of Context
     data*: int
     collection*: TableRef[string, PersonDto] # name to user
+
+# post hook for json deserialization
+proc postHook*(v: var PersonDto) =
+  assert v.name != ""
+  assert v.nick != ""
+  assert v.age != 0
+
 
 

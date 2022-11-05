@@ -10,12 +10,13 @@ const
     sql"""CREATE TABLE persons (
         id   INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
+        nick TEXT NOT NULL,
         age smallint NOT NULL 
       )"""
   CREATE_INDEX_ON_PERSONS_NAME = 
-    sql"CREATE unique index indx_name on persons (name)"
+    sql"CREATE unique index indx_nick on persons (nick)"
   FILL_WITH_MOCK = 
-    sql"insert into persons (name, age) values('sas sasov', 42)"
+    sql"insert into persons (name, nick, age) values('sas sasov', 'sas', 42)"
 
 proc createSqliteDbIfNotExist*() =
   let isDbExist = fileExists PATH_TO_SQLITE_DB
