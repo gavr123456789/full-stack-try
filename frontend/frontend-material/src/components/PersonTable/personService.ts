@@ -1,5 +1,5 @@
 // for no, no pagination supported
-import {convertFlatToPerson, Person, PersonFlat} from "../components/PersonTable/types";
+import {Person} from "../components/PersonTable/types";
 import axios from "axios";
 
 
@@ -31,8 +31,9 @@ function convertResponseToPerson(person: PersonResponse): Person {
     nick
   }
 }
+
 function convertPersonToRequest(person: Person): PersonRequest {
-  const {age, id, name: {firstName, lastName}, nick} = person
+  const {age, name: {firstName, lastName}, nick} = person
   return {
     age,
     name: firstName + " " + lastName,
@@ -40,9 +41,10 @@ function convertPersonToRequest(person: Person): PersonRequest {
   }
 }
 
+// gets
 export async function getAllPersons(): Promise<Person[]> {
   try {
-    const data = (await axios.get<PersonResponse[]>('/getAllPersons')).data
+    const data = (await axios.get<PersonResponse[]>('/persons')).data
     return data.map(x => convertResponseToPerson(x))
   } catch (e) {
     alert(e)
@@ -50,14 +52,24 @@ export async function getAllPersons(): Promise<Person[]> {
   return []
 }
 
-export async function addNewPersons(person: Person): Promise<number> {
-  const requestBody =convertPersonToRequest(person)
+export async function deletePerson(id: number): Promise<void> {
   try {
-    const data = (await axios.post<undefined, number, PersonRequest>('/person/add', requestBody))
-    return data
+    await axios.delete<PersonResponse[]>(`/persons/${id}`)
+  } catch (e) {
+    alert(e)
+  }
+}
+
+// posts
+export async function addNewPersons(person: Person): Promise<number> {
+  const requestBody = convertPersonToRequest(person)
+  try {
+    return (await axios.post<undefined, number, PersonRequest>('/persons/add', requestBody))
   } catch (e) {
     alert(e)
   }
   return 0
 }
+
+
 

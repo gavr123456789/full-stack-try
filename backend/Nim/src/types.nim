@@ -19,21 +19,13 @@ type
     id*: int
     
 
-  # PersonDto* = object 
-  #   # id*: string
-  #   name*: string
-  #   login*: string
-  #   password*: string
-
-  # TaskDto* = object
-  #   name: string
-
   InMemoryContext* = ref object of Context
     data*: int
     collection*: TableRef[string, PersonDto] # name to user
 
 # post hook for json deserialization
 proc postHook*(v: var PersonDto) =
+  echo "json parsing got: ", v
   assert v.name != ""
   assert v.nick != ""
   assert v.age != 0

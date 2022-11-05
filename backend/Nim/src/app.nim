@@ -42,11 +42,12 @@ let
 var app = newApp(settings = settings)
 
 with app:
-  get("/person/{nick}", findPerson)
-  get("/getAllPersons", getAllPersons)
-  post("/person/add", savePerson)
+  get("/persons/{nick}", findPerson)
+  get("/persons", getAllPersons)
+  post("/persons/add", savePerson)
+  post("/persons/deleteMany", deletePersons)
+  delete("/persons/{id}", deletePerson)
   post("/login", login)
-  delete("/person/{nick}", deletePerson)
 when dbType == inMemory:
   app.run(InMemoryContext)
 else:

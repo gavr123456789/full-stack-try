@@ -4,6 +4,10 @@ import prologue
 import jsony
 import types
 import consts
+import std/strformat
+
+type RowsToDelete = object
+  rowsIds: seq[int]
 
 var db {. threadVar .}: DBConn
 
@@ -23,8 +27,6 @@ proc findPerson*(ctx: Context) {.gcsafe, async.} =
       nickParam
     )
     person = PersonDto(name: row[0], nick: nickParam, age: row[1].parseInt) 
-  echo "nickParam = ", nickParam
-  echo "row = ", row 
   db.close()
 
   if person.age != 0:
@@ -40,14 +42,25 @@ proc login*(ctx: Context) {.gcsafe, async.} =
   resp "login"
 
 proc deletePerson*(ctx: Context) {.gcsafe, async.} =
-  const deleteSql = sql"delete from persons where nick = ?"
+  const deleteSql = sql"delete from persons where id = ?"
   let 
     db = initThreadVar()
-    nameParam = ctx.getPathParams("nick")
+    nameParam = ctx.getPathParams("id")
+  echo "delete id = ", nameParam
     
   db.exec(deleteSql, nameParam)
   db.close()
-  
+
+proc deletePersons*(ctx: Context) {.gcsafe, async.} =
+  let 
+    db = initThreadVar()
+    body = ctx.request.body
+    rowsIds = body.fromJson(RowsToDelete).rowsIds.join(", ")
+    deleteSql = "delete from persons where id in ({rowsIds})".fmt.sql
+  echo "delete id = ", rowsIds
+    
+  db.exec(deleteSql)
+  db.close()
 
 proc savePerson*(ctx: Context) {.gcsafe, async.} =
   const insertSql = sql"insert into persons (name, nick, age) values(?, ?, ?);"

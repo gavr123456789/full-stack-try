@@ -10,8 +10,18 @@ const
     sql"""CREATE TABLE persons (
         id   INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
-        nick TEXT NOT NULL,
+        nick TEXT NOT NULL UNIQUE,
         age smallint NOT NULL 
+      )"""
+  CREATE_TASKS = 
+    sql"""CREATE TABLE tasks (
+        id   INTEGER PRIMARY KEY,
+        title TEXT NOT NULL,
+        text TEXT NOT NULL,
+        status smallint NOT NULL 
+        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (list_id) REFERENCES persons (id),
+        ON DELETE CASCADE ON UPDATE CASCADE
       )"""
   CREATE_INDEX_ON_PERSONS_NAME = 
     sql"CREATE unique index indx_nick on persons (nick)"
@@ -27,5 +37,6 @@ proc createSqliteDbIfNotExist*() =
     with(db):
       exec(DROP_PERSONS_IF_EXISTR)
       exec(CREATE_PERSONS)
+      exec(CREATE_TASKS)
       exec(CREATE_INDEX_ON_PERSONS_NAME)
       exec(FILL_WITH_MOCK)
