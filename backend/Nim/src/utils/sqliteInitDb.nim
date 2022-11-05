@@ -4,6 +4,7 @@ import std/with
 import std/os
 
 const 
+  ENABLE_FOREIGN_KEY_SUPPORT = sql"PRAGMA foreign_keys = ON;"
   DROP_PERSONS_IF_EXISTR = 
     sql"DROP TABLE IF EXISTS persons"
   CREATE_PERSONS = 
@@ -18,9 +19,9 @@ const
         id   INTEGER PRIMARY KEY,
         title TEXT NOT NULL,
         text TEXT NOT NULL,
-        status smallint NOT NULL 
-        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (list_id) REFERENCES persons (id),
+        status smallint NOT NULL,
+        list_id INTEGER NOT NULL,
+        FOREIGN KEY (list_id) REFERENCES persons (id)
         ON DELETE CASCADE ON UPDATE CASCADE
       )"""
   CREATE_INDEX_ON_PERSONS_NAME = 
@@ -35,8 +36,10 @@ proc createSqliteDbIfNotExist*() =
     let db = open(PATH_TO_SQLITE_DB, "", "", "")
 
     with(db):
+      exec(ENABLE_FOREIGN_KEY_SUPPORT)
       exec(DROP_PERSONS_IF_EXISTR)
       exec(CREATE_PERSONS)
-      exec(CREATE_TASKS)
       exec(CREATE_INDEX_ON_PERSONS_NAME)
       exec(FILL_WITH_MOCK)
+      exec(CREATE_TASKS)
+

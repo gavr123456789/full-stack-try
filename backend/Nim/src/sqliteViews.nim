@@ -79,6 +79,23 @@ proc savePerson*(ctx: Context) {.gcsafe, async.} =
   else:
     resp "Error when save new person, may be its nick not unique"
 
+proc editPerson*(ctx: Context) {.gcsafe, async.} =
+  const updateSql = sql"""update persons 
+    set name = ?, nick = ?, age = ? 
+    where id = ?;
+  """
+  let 
+    db = initThreadVar()
+    body = ctx.request.body
+    person = body.fromJson(PersonDto)
+  db.exec( 
+    updateSql,  
+    person.name, person.nick, person.age, person.id
+  )
+  
+  db.close()
+
+
 
 proc getAllPersons*(ctx: Context) {.gcsafe, async.} =
   let 

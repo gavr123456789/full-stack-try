@@ -45,6 +45,7 @@ with app:
   get("/persons/{nick}", findPerson)
   get("/persons", getAllPersons)
   post("/persons/add", savePerson)
+  post("/persons/edit", editPerson)
   post("/persons/deleteMany", deletePersons)
   delete("/persons/{id}", deletePerson)
   post("/login", login)
