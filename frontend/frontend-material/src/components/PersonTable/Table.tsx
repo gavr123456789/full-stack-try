@@ -3,7 +3,7 @@ import MaterialReactTable, {MRT_ColumnDef, MRT_Row} from 'material-react-table';
 import {Button} from '@mui/material';
 import {FormDialog} from "./FormDialog";
 import {EMPTY_PERSON, Person} from "./types";
-import {addNewPersons, deletePersons, getAllPersons} from "./personService";
+import {addNewPersons, deletePersons, editPersons, getAllPersons} from "./personService";
 
 
 const PersonTable: FC = () => {
@@ -46,16 +46,13 @@ const PersonTable: FC = () => {
 
 
   const addNewPersonCb = useCallback(async (person: Person) => {
-    const id = await addNewPersons(person)
+    await addNewPersons(person)
     await reload()
-    return id
   }, [])
 
-  const editPersonCb = useCallback((person: Person) => {
-    console.log("added person: ", person)
-    const realTempId = 222
-    person.id = realTempId
-    setData([...data, person])
+  const editPersonCb = useCallback(async (person: Person) => {
+    await editPersons(person)
+    await reload()
   }, [])
 
   const deletePersonCb = useCallback(async (selectedRows: MRT_Row<Person>[]) => {
@@ -78,6 +75,7 @@ const PersonTable: FC = () => {
 
           const currentRow = table.getSelectedRowModel().rows.at(0)?.original
           const currentRows = table.getSelectedRowModel().rows
+
           return (
 
             <div style={{display: 'flex', gap: '0.5rem'}}>
@@ -85,10 +83,10 @@ const PersonTable: FC = () => {
               <FormDialog submitNewPerson={addNewPersonCb} kind={"add"} text={"Add new person"}/>
 
               <FormDialog
-                submitNewPerson={addNewPersonCb}
+                submitNewPerson={editPersonCb}
                 kind={"edit"}
                 text={"Edit person"}
-                disabled={table.getSelectedRowModel().flatRows.length !== 1}
+                disabled={table.getSelectedRowModel().flatRows.length > 1}
                 person={currentRow ?? EMPTY_PERSON}
               />
 

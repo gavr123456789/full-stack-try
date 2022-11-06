@@ -9,7 +9,7 @@ import {convertPersonToRow, convertFlatToPerson, EMPTY_PERSON_ROW, Person, Perso
 import {Box} from '@mui/material';
 import {nameOf} from "../../utils/typeUtils";
 
-type SubmitPersonFunc = (person: Person) => Promise<number>
+type SubmitPersonFunc = (person: Person) => Promise<void>
 type FormDialogProps =
   {
     kind: "add"
@@ -40,9 +40,11 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
 
   useEffect(() => {
     if (props.kind === "edit") {
+      console.log("edit")
       setFormValues(convertPersonToRow(props.person))
     }
-  }, [])
+  }, [props])
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -51,6 +53,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
   const resetModel = () => {
     setFormValues(EMPTY_PERSON_ROW)
   }
+
   const handleClose = () => {
     resetModel()
     setOpen(false);
@@ -65,8 +68,9 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
   };
 
 
-  function handleSubmit() {
-    submitNewPerson(convertFlatToPerson(formValues))
+
+  async function handleSubmit() {
+    await submitNewPerson(convertFlatToPerson(formValues))
     handleClose()
   }
 
@@ -75,7 +79,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
       <Button variant="outlined" color={props.kind === "add"? "success": "info"} onClick={handleClickOpen}>
         {text}
       </Button>
-      <Dialog open={isOpen} onClose={handleClose}>
+      {isOpen && <Dialog open={isOpen} onClose={handleClose}>
         <DialogTitle>{text}</DialogTitle>
         <DialogContent>
 
@@ -128,7 +132,7 @@ export const FormDialog: FC<FormDialogProps> = (props) => {
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSubmit}>Add</Button>
         </DialogActions>
-      </Dialog>
+      </Dialog>}
     </div>
   );
 }

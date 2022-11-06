@@ -9,8 +9,9 @@ type PersonResponse = {
   id: number,
   age: number
 }
+type PersonEditRequest = PersonResponse
 
-type PersonRequest = Omit<PersonResponse, "id">
+type AddPersonRequest = Omit<PersonResponse, "id">
 
 function convertResponseToPerson(person: PersonResponse): Person {
   const {age, id, name, nick} = person
@@ -32,7 +33,16 @@ function convertResponseToPerson(person: PersonResponse): Person {
   }
 }
 
-function convertPersonToRequest(person: Person): PersonRequest {
+function convertPersonToEditRequest(person: Person): PersonEditRequest {
+  const {age, name: {firstName, lastName}, nick, id} = person
+  return {
+    age,
+    name: firstName + " " + lastName,
+    nick,
+    id
+  }
+}
+function convertPersonToRequest(person: Person): AddPersonRequest {
   const {age, name: {firstName, lastName}, nick} = person
   return {
     age,
@@ -78,12 +88,19 @@ export async function deletePersons(rowsIds: number[]): Promise<void> {
 export async function addNewPersons(person: Person): Promise<number> {
   const requestBody = convertPersonToRequest(person)
   try {
-    return (await axios.post<undefined, number, PersonRequest>('/persons/add', requestBody))
+    return (await axios.post<undefined, number, AddPersonRequest>('/persons/add', requestBody))
   } catch (e) {
     alert(e)
   }
   return 0
 }
 
-
+export async function editPersons(person: Person): Promise<void> {
+  const requestBody = convertPersonToEditRequest(person)
+  try {
+    await axios.post<undefined, void, PersonResponse>('/persons/edit', requestBody)
+  } catch (e) {
+    alert(e)
+  }
+}
 
