@@ -20,7 +20,7 @@ fun Application.configureLoginRouting() {
             } else {
                 if (user.login != receive.login) {
                     call.respond(HttpStatusCode.BadRequest, "Wrong login or password")
-                 }
+                }
             }
             if (InMemory.userList.map { it.login }.contains(receive.login)) {
                 val token = UUID.randomUUID().toString()
